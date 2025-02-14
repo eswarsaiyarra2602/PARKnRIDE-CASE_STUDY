@@ -89,39 +89,44 @@ const deleteParkingSlot = async (req, res) => {
   }
 };
 
-// Find nearest parking slots
-const findNearestParkingSlots = async (req, res) => {
+
+// Get nearest parking slots (metro stations) based on user location
+const getNearestParkingSlots = async (req, res) => {
   try {
-    const { latitude, longitude, maxDistance } = req.query;
+    const { latitude, longitude, maxDistanceFromUser } = req.body; // User's location coordinates
+
+    const distance = maxDistanceFromUser || 10000;
 
     if (!latitude || !longitude) {
-      return res.status(400).json({ message: 'Latitude and longitude are required' });
+      return res.status(400).json({ message: 'Latitude and Longitude are required' });
     }
 
-    const distance = maxDistance ? parseInt(maxDistance) : 5000; // Default to 5km if not provided
-
-    const nearbySlots = await ParkingSlot.find({
-      parkingLocation: {
-        $near: {
-          $geometry: {
-            type: 'Point',
-            coordinates: [parseFloat(longitude), parseFloat(latitude)]
-          },
-          $maxDistance: distance
+    //find nearest sorted by distance
+    const nearbySlots = await ParkingSlot.aggregate([
+      {
+        $geoNear: {
+          near: { type: "Point", coordinates: [longitude, latitude] },
+          distanceField: "distance",
+          maxDistance: distance,
+          spherical: true
         }
       }
-    });
+    ]);
+
+    if (nearbySlots.length === 0) {
+      return res.status(404).json({ message: 'No nearby parking slots found' });
+    }
 
     res.status(200).json(nearbySlots);
   } catch (error) {
-    console.error('Error in findNearestParkingSlots:', error.message);
     res.status(500).json({ message: 'Error finding nearest parking slots', error: error.message });
   }
 };
+
 
 module.exports = {
   addParkingSlot,
   updateParkingSlot,
   deleteParkingSlot,
-  findNearestParkingSlots
+  getNearestParkingSlots
 };
