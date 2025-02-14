@@ -1,23 +1,35 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-//middleware to protect routes by verifying the token
-const protect = async (req, res, next) => {
-  let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded._id).select('-password');
-      next();
-    } catch (error) {
-      res.status(401).json({ message: 'Not authorized, token failed' });
-    }
-  }
 
-  if (!token) {
-    res.status(401).json({ message: 'No token, authorization denied' });
-  }
+
+const protect = async (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+    try {
+      if (!token) {
+        return res.status(401).json({ message: 'Token is missing' });
+      }
+  
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+  
+      if (!decoded) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+  
+      // Find the user associated with the token
+      const user = await User.findById(decoded._id); 
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Attach user to the request object and proceed to the next middleware
+      req.user = user; 
+      next(); 
+  
+    } catch (error) {
+      console.log("Error in adminAuthMiddleware:", error.message); // Log any error messages
+      res.status(401).json({ message: 'Authentication failed', error: error.message });
+    }
 };
 
 module.exports = { protect };
