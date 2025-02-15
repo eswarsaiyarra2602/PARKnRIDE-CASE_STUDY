@@ -24,7 +24,7 @@ const parkingReservationSchema = new mongoose.Schema({
   },
   bookingStatus: {
     type: String,
-    enum: ['confirmed', 'pending', 'canceled'],
+    enum: ['confirmed', 'pending', 'cancelled'],
     default: 'pending'
   },
   duration: {
@@ -40,6 +40,10 @@ const parkingReservationSchema = new mongoose.Schema({
     default: Date.now
   },
   startTime: {
+    type: Date,
+    required: true
+  },
+  endTime: {
     type: Date,
     required: true
   },

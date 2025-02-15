@@ -65,6 +65,7 @@ const bookParkingSpace = async (req, res) => {
         duration: `${duration} ${parkingDurationType}`, 
         totalPrice,
         startTime,
+        endTime,
         bookingTime: Date.now(),
         refundStatus: 'not-applicable'
       });
@@ -79,7 +80,7 @@ const bookParkingSpace = async (req, res) => {
 
       await newReservation.save();
       await availableSlot.save();
-      await User.findByIdAndUpdate(userId, { $push: { parkingReservation: newReservation._id } });
+      await User.findByIdAndUpdate(userId, { $push: { parkingReservation: bookingId } });
       
       return res.status(200).json({ message: 'Slot booked successfully', slot: availableSlot, bookingId : bookingId  });
     } else {
@@ -98,7 +99,7 @@ const cancelParkingBookingSpace = async (req, res) => {
   try {
     const { bookingId } = req.body;
     const userId = req.user._id; // Obtained from protect middleware
-
+ 
     // Find the reservation by bookingId and userId
     const reservation = await ParkingReservation.findOne({ bookingId, userId });
     if (!reservation) {
@@ -136,8 +137,12 @@ const cancelParkingBookingSpace = async (req, res) => {
     await reservation.save();
 
     // Find the parking space and remove the specific time slot
-    await ParkingSpace.findByIdAndUpdate(
-      reservation.parkingSpaceId, 
+    const updateResult = await ParkingSpace.updateOne(
+      { 
+        _id: reservation.parkingSpaceId,
+        "bookedSlots.startTime": reservation.startTime,
+        "bookedSlots.endTime": reservation.endTime
+      },
       {
         $pull: {
           bookedSlots: {
@@ -148,6 +153,15 @@ const cancelParkingBookingSpace = async (req, res) => {
       }
     );
 
+    // Check if the $pull operation was successful
+    if (updateResult.modifiedCount === 0) {
+      console.error("Error: Failed to remove the time slot from bookedSlots.");
+      return res.status(500).json({ 
+        message: 'Failed to update bookedSlots. Please try again later.' 
+      });
+    }
+
+    
     res.status(200).json({ 
       message: 'Booking canceled', 
       bookingId: reservation.bookingId,
