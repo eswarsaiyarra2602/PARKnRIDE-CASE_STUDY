@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const ParkingLocation = require('./ParkingLocation');
 
-const parkingReservationSchema = new mongoose.Schema({
+const ParkingReservationSchema = new mongoose.Schema({
   bookingId: {
     type: String,
     required: true,
@@ -58,4 +57,4 @@ const parkingReservationSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('ParkingReservation', parkingReservationSchema);
+module.exports = mongoose.model('ParkingReservation', ParkingReservationSchema);

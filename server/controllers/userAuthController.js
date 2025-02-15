@@ -9,14 +9,16 @@ const generateToken = (user) => {
 // Register User
 exports.registerUser = async (req, res) => {
   try {
-    const { name, email, password, metroCard } = req.body;
+    const { name, email, password, contact, metroCard } = req.body;
     if(req.body && req.body.role == 'admin') return res.status(400).json({ message: 'Unauthorized' }); // Prevent user trying to assign admin role himself
-    if(!name || !email || !password) return res.status(400).json({ message: 'Please fill in all fields' });
+    if(!name || !email || !password || !contact) return res.status(400).json({ message: 'Please fill in all fields' });
+    
+    if(!isNaN(contact) && contact.toString().length !== 10) return res.status(400).json({ message: 'Invalid contact number' });
     
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
-    const user = new User({ name, email, password, metroCard});
+    const user = new User({ name, email, password, contact, metroCard});
     await user.save();
 
     res.status(201).json({ token: generateToken(user) });
