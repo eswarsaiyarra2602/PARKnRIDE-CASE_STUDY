@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   rides: [{ type: String, required: false }],
   parkingReservation: [{ type : String, required : false }], 
   role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  rewardCoins: { type: Number, default: 0 }
 }, { timestamps: true });
 
 // Password Hashing

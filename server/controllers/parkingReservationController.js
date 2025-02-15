@@ -1,10 +1,13 @@
 const ParkingReservation = require('../models/ParkingReservation');
 const ParkingSpace = require('../models/ParkingSpace');
 const ParkingLocation = require('../models/ParkingLocation');
+const QRCode = require('qrcode');
 const User = require('../models/User');
+const rewardCoins = require('../utils/rewardCoins');
+
+
 
 // Book Parking Slot
-
 const bookParkingSpace = async (req, res) => {
   try {
     const { locationCode, startTime, endTime, parkingDurationType, duration} = req.body;
@@ -56,6 +59,19 @@ const bookParkingSpace = async (req, res) => {
           return res.status(400).json({ message: 'Invalid duration type' });
       }
 
+
+      //generate qr
+      const qrData = {
+        bookingId,
+        userId,
+        parkingLocationId: parkingLocation._id,
+        startTime,
+        endTime
+      };
+      
+      const qrCodeString = JSON.stringify(qrData);
+      const qrCodeUrl = await QRCode.toDataURL(qrCodeString);
+
       const newReservation = new ParkingReservation({
         bookingId,
         userId,
@@ -67,7 +83,8 @@ const bookParkingSpace = async (req, res) => {
         startTime,
         endTime,
         bookingTime: Date.now(),
-        refundStatus: 'not-applicable'
+        refundStatus: 'not-applicable',
+        qrCodeData: qrCodeUrl 
       });
 
      
@@ -78,11 +95,22 @@ const bookParkingSpace = async (req, res) => {
         endTime,
       });
 
+      // Calculate reward coins and update user account
+      const rewardCoins = calculateRewardCoins(totalPrice);
+      await User.findByIdAndUpdate(userId, {
+        $inc: { rewardCoins: rewardCoins }
+      });
+
       await newReservation.save();
       await availableSlot.save();
       await User.findByIdAndUpdate(userId, { $push: { parkingReservation: bookingId } });
       
-      return res.status(200).json({ message: 'Slot booked successfully', slot: availableSlot, bookingId : bookingId  });
+      return res.status(200).json({ 
+        message: 'Slot booked successfully', 
+        slot: availableSlot, 
+        bookingId: bookingId,
+        rewardCoins: rewardCoins  
+      });    
     } else {
       // Step 4: If no slot is available
       return res.status(404).json({ message: 'No available slots for the selected time interval' });

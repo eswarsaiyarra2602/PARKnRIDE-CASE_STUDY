@@ -23,8 +23,8 @@ const ParkingReservationSchema = new mongoose.Schema({
   },
   bookingStatus: {
     type: String,
-    enum: ['confirmed', 'pending', 'cancelled'],
-    default: 'pending'
+    enum: ['confirmed', 'checked-in', 'checked-out', 'cancelled'],
+    default: 'confirmed'
   },
   duration: {
     type: String, 
@@ -50,6 +50,10 @@ const ParkingReservationSchema = new mongoose.Schema({
     type: String,
     enum: ['not-applicable', 'requested', 'initiated', 'rejected'],
     default: 'not-applicable',
+  },
+  qrCodeData: {
+    type: String,
+    required: true
   },
   refundAmount: {
     type: Number,

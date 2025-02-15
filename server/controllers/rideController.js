@@ -1,8 +1,8 @@
 const RideBooking = require('../models/RideBooking');
 const User = require('../models/User');
 const { calculateFare } = require('../utils/fareCalculator');
-
-
+const rideRefundCalculator = require('../utils/rideRefundCalculator');
+const rewardCoins = require('../utils/rewardCoins');
 //book a ride
 const bookRide = async (req, res) => {
     try {
@@ -35,7 +35,11 @@ const bookRide = async (req, res) => {
       });
   
       await newRide.save();
-  
+      
+      //reward coins for user
+      const rewardCoins = rewardCoins(totalFare);
+      await User.findByIdAndUpdate(userId, { $inc: { rewardCoins: rewardCoins } });
+      
       // Push the booking ID into the user's rides array
       await User.findByIdAndUpdate(
         userId,
@@ -105,7 +109,7 @@ const getRides = async (req, res) => {
       
       ride.status = 'cancelled';
       ride.refundStatus = 'initiated';
-      ride.refundAmount = ride.totalFare; 
+      ride.refundAmount = rideRefundCalculator(ride.totalFare, ride.pickupTime); 
       await ride.save();
   
       return res.status(200).json({ message: 'Ride cancelled successfully', refundStatus: ride.refundStatus });
