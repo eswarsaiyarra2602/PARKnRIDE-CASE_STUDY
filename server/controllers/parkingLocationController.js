@@ -1,5 +1,7 @@
 const ParkingLocation = require('../models/ParkingLocation');
 
+
+//access to admin only
 // Add new parking location
 const addParkingLocation = async (req, res) => {
   try {

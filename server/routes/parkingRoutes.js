@@ -7,5 +7,4 @@ const router = express.Router();
 router.post('/nearest', getNearestParkingLocations);
 router.post('/book-slot', protect, bookParkingSpace);
 router.post('/cancel-slot', protect, cancelParkingBookingSpace);
-
 module.exports = router;

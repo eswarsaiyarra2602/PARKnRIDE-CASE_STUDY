@@ -96,9 +96,9 @@ const bookParkingSpace = async (req, res) => {
       });
 
       // Calculate reward coins and update user account
-      const rewardCoins = calculateRewardCoins(totalPrice);
+      const earnedCoins=  rewardCoins(totalPrice);
       await User.findByIdAndUpdate(userId, {
-        $inc: { rewardCoins: rewardCoins }
+        $inc: { rewardCoins: earnedCoins }
       });
 
       await newReservation.save();
@@ -109,7 +109,7 @@ const bookParkingSpace = async (req, res) => {
         message: 'Slot booked successfully', 
         slot: availableSlot, 
         bookingId: bookingId,
-        rewardCoins: rewardCoins  
+        rewardCoins: earnedCoins  
       });    
     } else {
       // Step 4: If no slot is available

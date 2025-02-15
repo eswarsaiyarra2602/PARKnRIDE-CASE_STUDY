@@ -4,9 +4,24 @@ const { calculateFare } = require('../utils/fareCalculator');
 const rideRefundCalculator = require('../utils/rideRefundCalculator');
 const rewardCoins = require('../utils/rewardCoins');
 //book a ride
+const getFare = async (req, res) => {
+    try { 
+      const { pickup, dropPoint, vehicleType } = req.body;
+      if (!pickup || !dropPoint || !vehicleType) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+      totalFare = await calculateFare(pickup, dropPoint, vehicleType);
+      return res.status(200).json({ totalFare });
+    } catch (error) {
+      console.error('Error getting fare:', error.message);
+      return res.status(500).json({ message: 'Server Error', error: error.message });
+    }
+  };
+
 const bookRide = async (req, res) => {
     try {
       const { pickup, dropPoint, vehicleType, pickupTime } = req.body;
+      const user = req.user;
       const userId = req.user._id;
       const contact = req.user.contact;
   
@@ -15,13 +30,13 @@ const bookRide = async (req, res) => {
       }
   
       // Calculate fare using a utility function
-      const totalFare = calculateFare(pickup, dropPoint, vehicleType);
+      const totalFare = await calculateFare(pickup, dropPoint, vehicleType);
   
       // Generate unique booking ID
       const shortUserId = userId.toString().slice(-5);
       const timestamp = Date.now();
       const bookingId = `RIDE-${shortUserId}-${timestamp}`;
-  
+      
       const newRide = new RideBooking({
         bookingId,
         status: 'pending',
@@ -37,8 +52,8 @@ const bookRide = async (req, res) => {
       await newRide.save();
       
       //reward coins for user
-      const rewardCoins = rewardCoins(totalFare);
-      await User.findByIdAndUpdate(userId, { $inc: { rewardCoins: rewardCoins } });
+      const coins = rewardCoins(totalFare);
+      await User.findByIdAndUpdate(userId, { $inc: { rewardCoins: coins } });
       
       // Push the booking ID into the user's rides array
       await User.findByIdAndUpdate(
@@ -46,7 +61,43 @@ const bookRide = async (req, res) => {
         { $push: { rides: bookingId } },
         { new: true }
       );
-  
+      
+
+      //sendingEmail
+      const sendEmail = require('../utils/sendEmail');
+      try {
+        // Construct the email content
+        const decodedPickupTime = new Date(pickupTime).toLocaleString('en-IN', {
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric', 
+          hour: 'numeric', 
+          minute: 'numeric', 
+          hour12: true
+        });
+        
+        // Construct the email content with the formatted pickupTime
+        const emailHtml = `
+          <h2>Ride Booking Confirmed</h2>
+          <p>Hi ${user.name},</p>
+          <p>Your ride has been successfully booked!</p>
+          <ul>
+            <li><strong>Pickup Point:</strong> ${pickup}</li>
+            <li><strong>Drop Point:</strong> ${dropPoint}</li>
+            <li><strong>Vehicle Type:</strong> ${vehicleType}</li>
+            <li><strong>Pickup Time:</strong> ${decodedPickupTime}</li>
+            <li><strong>Total Fare:</strong> ₹${totalFare}</li>
+          </ul>
+          <p>Thank you for choosing our service!</p>
+        `;
+
+        // Call sendEmail utility
+        await sendEmail(user.email, 'Ride Booking Confirmation', emailHtml);
+
+      } catch (error) {
+        console.error('Error sending booking confirmation email:', error);
+      }
       return res.status(201).json({ message: 'Ride booked successfully', bookingId, totalFare });
     } catch (error) {
       console.error('Error booking ride:', error.message);
@@ -120,4 +171,4 @@ const getRides = async (req, res) => {
   };
 
 
-  module.exports = { bookRide, getRides, getRideById, cancelRide };
+  module.exports = { bookRide, getRides, getRideById, cancelRide, getFare };

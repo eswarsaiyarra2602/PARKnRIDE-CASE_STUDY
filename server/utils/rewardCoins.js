@@ -6,7 +6,7 @@ const getRandomNumber = (min, max) => {
   };
   
   // Function to calculate reward coins based on the total price
-  const calculateRewardCoins = (totalPrice) => {
+  const rewardCoins = (totalPrice) => {
     let rewardCoins = 0;
   
     if (totalPrice < 500) {
@@ -20,4 +20,4 @@ const getRandomNumber = (min, max) => {
     return rewardCoins;
   };
   
-  module.exports = calculateRewardCoins;
+  module.exports = rewardCoins;

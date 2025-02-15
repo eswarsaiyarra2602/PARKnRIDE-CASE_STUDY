@@ -18,7 +18,8 @@ exports.registerUser = async (req, res) => {
     if (!isNaN(contact) && contact.toString().length !== 10) return res.status(400).json({ message: 'Invalid contact number' });
 
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    const existingContact = await User.findOne({ contact });
+    if (existingUser || existingContact) return res.status(400).json({ message: 'User already exists' });
 
     const user = new User({ name, email, password, contact, metroCard, role });
     await user.save();
