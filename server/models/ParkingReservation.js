@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const ParkingLocation = require('./ParkingLocation');
 
 const parkingReservationSchema = new mongoose.Schema({
   bookingId: {
@@ -11,14 +12,19 @@ const parkingReservationSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  parkingLocation: {
+  parkingLocationId:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ParkingSlot',
+    ref: 'ParkingLocation',
+    required: true
+  },
+  parkingSpaceId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ParkingSpace',
     required: true
   },
   bookingStatus: {
     type: String,
-    enum: ['confirmed', 'pending', 'cancelled'],
+    enum: ['confirmed', 'pending', 'canceled'],
     default: 'pending'
   },
   duration: {
@@ -33,10 +39,18 @@ const parkingReservationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  startTime: {
+    type: Date,
+    required: true
+  },
   refundStatus: {
     type: String,
-    enum: ['not-applicable', 'requested', 'approved', 'rejected'],
-    default: 'not-applicable'
+    enum: ['not-applicable', 'requested', 'initiated', 'rejected'],
+    default: 'not-applicable',
+  },
+  refundAmount: {
+    type: Number,
+    default: 0
   }
 });
 
