@@ -1,0 +1,152 @@
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Header */
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c3e50;
+  color: white;
+  padding: 10px 20px;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.admin-signout-btn {
+  background: #e74c3c;
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-signout-btn:hover {
+  background: #c0392b;
+}
+
+/* Main Content */
+.admin-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 220px;
+  background: #34495e;
+  color: white;
+  padding: 20px;
+  height: calc(100vh - 50px);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-sidebar h3 {
+  color: #ecf0f1;
+}
+
+.admin-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.admin-sidebar ul li {
+  margin-bottom: 15px;
+}
+
+.admin-sidebar ul li button {
+  width: 100%;
+  background: #1abc9c;
+  border: none;
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.3s;
+  font-size: 16px;
+}
+
+.admin-sidebar ul li button:hover {
+  background: #16a085;
+}
+
+.admin-sidebar ul li button.active {
+  background: #27ae60;
+  font-weight: bold;
+}
+
+/* Content Area */
+.admin-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.admin-content h2 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+/* Form */
+.admin-form {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+}
+
+.admin-form input {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+}
+
+.admin-form button {
+  padding: 10px 15px;
+  background: #2980b9;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.admin-form button:hover {
+  background: #1f6396;
+}
+
+.admin-slots-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.admin-slot-item {
+  background: #ecf0f1;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-booking-details {
+  background: #fff;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
